@@ -143,14 +143,20 @@ with col2:
 # Collect additional user inputs
 days = st.number_input('Number of days for tourism', min_value=1, max_value=30)
 must_go_places = st.text_input('Must-go places')
-food_preferences = st.text_input('Food Preferences')
+food_preferences = st.selectbox(
+    'Food Preferences',
+    ['Select a Cuisine', 'Indian', 'Mexican', 'Chinese', 'Italian', 'Thai', 'Japanese', 'French', 'Mediterranean', 'Korean']
+)
 budget = st.text_input('Budget for the trip')
 
 # Generate itinerary button
 if st.button('Generate Itinerary'):
-    itinerary = get_itinerary(user_location, days, must_go_places, food_preferences, budget)
-    st.text(itinerary)
-
+    # Check if the user has selected a cuisine
+    if food_preferences != 'Select a Cuisine':
+        itinerary = get_itinerary(user_location, days, must_go_places, food_preferences, budget)
+        st.text(itinerary)
+    else:
+        st.error('Please select a food preference.')
 
 
 
