@@ -88,7 +88,36 @@ model = setup_backend()
 
 # Function to get the itinerary based on user input
 def get_itinerary(user_location, days, must_go_places, food_preferences, budget):
-    prompt = f"Given that the user is in {user_location}, staying for {days} days, wants to visit {must_go_places}, prefers {food_preferences} food, and has a budget of {budget}, generate a suitable tourism itinerary."
+    prompt = f'''You are a Travel advisor GPT, your task is to give a list of itineraries, based on user inputs like :
+
+City :
+User Location :
+No of days they are staying :
+Food Interests:(List of Cuisines)
+Locations user wants to for sure visit :
+Budget of the user: (Budget Friendly, No Cost Preference)
+if user says “Budget Friendly ” The itineraries should be focused with in 
+	-  First preference, save budget 
+	- Second preference to Places user want to visit, Popular locations in that city
+	- Cover most places they can
+if user says “No Cost Preference ” The itineraries should be focused
+	- first preference to Places user want to visit, Popular locations in that city
+	- Cover most places they can
+
+the list of itineraies should go from low budget to high budget 
+and every itinerary should cover user’s must visit places list as 
+
+Output should be a json formatted with a list of 4 itineraries
+itinerary 1 , itinerary 2 , itinerary 3 , itinerary 4
+with each itinerary with unique id having details for for each with List of places with 3 food places with food interests near each place, location coordinates for each place , timing of each place and cost of the visit to each place and day to day places should be optimised by travel time
+
+Inputs :
+City : Chicago
+User Location : {user_location}
+No of days they are staying : {days}
+Locations user wants to for sure visit :  {must_go_places}
+Food Interests: {food_preferences} 
+Budget: {budget}'''
     convo = model.start_chat(history=[])
     convo.send_message(prompt)
     return convo.last.text
@@ -104,7 +133,7 @@ col1, col2 = st.columns([4, 1])
 
 # Location input field
 with col1:
-    user_location = st.text_input('Enter your location', 'Chicago Riverwalk')
+    user_location = st.text_input('Enter your location')
 
 # Geolocation button
 with col2:
@@ -112,10 +141,10 @@ with col2:
         get_location()  # Call the JavaScript function to get the geolocation
 
 # Collect additional user inputs
-days = st.number_input('Number of days for tourism', min_value=1, max_value=30, value=3)
-must_go_places = st.text_input('Must-go places', 'Navy Pier, Millennium Park')
-food_preferences = st.text_input('Food Preferences', 'Local, Italian')
-budget = st.text_input('Budget for the trip', '500')
+days = st.number_input('Number of days for tourism', min_value=1, max_value=30)
+must_go_places = st.text_input('Must-go places')
+food_preferences = st.text_input('Food Preferences')
+budget = st.text_input('Budget for the trip')
 
 # Generate itinerary button
 if st.button('Generate Itinerary'):
@@ -157,108 +186,6 @@ if st.button('Generate Itinerary'):
 
 
 
-
-
-
-
-
-
-
-# import streamlit as st
-# from dotenv import load_dotenv
-# import os
-# import google.generativeai as genai
-# import streamlit.components.v1 as components
-
-# # Function to display HTML/JavaScript for geolocation
-# def get_location():
-#     # HTML to request geolocation and send it back to Streamlit
-#     geolocation_html = """
-#     <button onclick="getLocation()">Get Location</button>
-#     <script>
-#     function getLocation() {
-#         if (navigator.geolocation) {
-#             navigator.geolocation.getCurrentPosition(showPosition, showError);
-#         } else {
-#             alert('Geolocation is not supported by this browser.');
-#         }
-#     }
-#     function showPosition(position) {
-#         const lat = position.coords.latitude;
-#         const lon = position.coords.longitude;
-#         const message = {lat: lat, lon: lon};
-#         window.parent.postMessage({type: 'streamlit:setComponentValue', data: message}, '*');
-#     }
-#     function showError(error) {
-#         switch(error.code) {
-#             case error.PERMISSION_DENIED:
-#                 alert('User denied the request for Geolocation.');
-#                 break;
-#             case error.POSITION_UNAVAILABLE:
-#                 alert('Location information is unavailable.');
-#                 break;
-#             case error.TIMEOUT:
-#                 alert('The request to get user location timed out.');
-#                 break;
-#             case error.UNKNOWN_ERROR:
-#                 alert('An unknown error occurred.');
-#                 break;
-#         }
-#     }
-#     </script>
-#     """
-#     return components.html(geolocation_html, height=30)
-
-# # Initialize your backend setup
-# def setup_backend():
-#     load_dotenv()
-#     api_key = os.getenv('API_KEY')
-#     genai.configure(api_key=api_key)
-
-#     generation_config = {
-#         "temperature": 0.9,
-#         "top_p": 1,
-#         "top_k": 1,
-#         "max_output_tokens": 2048,
-#     }
-
-#     safety_settings = [
-#         {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-#         {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-#         {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-#         {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-#     ]
-
-#     model = genai.GenerativeModel(model_name="gemini-1.0-pro", generation_config=generation_config, safety_settings=safety_settings)
-#     return model
-
-# model = setup_backend()
-
-# def get_itinerary(user_location, days, must_go_places, food_preferences, budget):
-#     prompt = f"Given that the user is in {user_location}, staying for {days} days, wants to visit {must_go_places}, prefers {food_preferences} food, and has a budget of {budget}, generate a suitable tourism itinerary."
-#     convo = model.start_chat(history=[])
-#     convo.send_message(prompt)
-#     return convo.last.text
-
-# st.title('Tourism Itinerary Generator for Chicago')
-
-# # Using the function in app and handling the geolocation
-# if st.button('Get Current Location'):
-#     location = get_location()
-#     if location:
-#         user_location = f"{location['latitude']}, {location['longitude']}"
-#         st.session_state['user_location'] = user_location
-
-# user_location = st.text_input('Enter your location', value=st.session_state.get('user_location', 'Chicago Riverwalk'))
-
-# days = st.number_input('Number of days for tourism', min_value=1, max_value=30, value=3)
-# must_go_places = st.text_input('Must-go places', 'Navy Pier, Millennium Park')
-# food_preferences = st.text_input('Food Preferences', 'Local, Italian')
-# budget = st.text_input('Budget for the trip', '500')
-
-# if st.button('Generate Itinerary'):
-#     itinerary = get_itinerary(user_location, days, must_go_places, food_preferences, budget)
-#     st.text(itinerary)
 
 
 
