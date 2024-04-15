@@ -1,0 +1,34 @@
+import streamlit as st
+import streamlit.components.v1 as components
+
+def get_location():
+    # HTML to request geolocation and send it back to Streamlit
+    geolocation_html = """
+    <button onclick="getLocation()">Get Location</button>
+    <p id="location"></p>
+    <script>
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+            document.getElementById('location').innerHTML = "Geolocation is not supported by this browser.";
+        }
+    }
+    function showPosition(position) {
+        document.getElementById('location').innerHTML = "Latitude: " + position.coords.latitude + 
+        "<br>Longitude: " + position.coords.longitude;
+        // Use Streamlit's setComponentValue to send data back to Python
+        window.parent.postMessage({
+            type: 'streamlit:setComponentValue',
+            data: {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+            }
+        }, '*');
+    }
+    </script>
+    """
+    return components.html(geolocation_html, height=100)
+
+# Use the function in your app
+location = get_location()
