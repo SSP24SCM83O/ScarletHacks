@@ -147,7 +147,11 @@ food_preferences = st.selectbox(
     'Food Preferences',
     ['Select a Cuisine', 'Indian', 'Mexican', 'Chinese', 'Italian', 'Thai', 'Japanese', 'French', 'Mediterranean', 'Korean']
 )
-budget = st.text_input('Budget for the trip')
+budget = st.radio(
+    "Budget for the trip",
+    ('Budget Friendly', 'No Cost Preference'),
+    key='budget'
+)
 
 # Generate itinerary button
 if st.button('Generate Itinerary'):
